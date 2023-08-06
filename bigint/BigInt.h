@@ -10,16 +10,16 @@
 #include <complex>
 #include <iostream>
 #include "ftype.h"
+#include "array.h"
 
-const double pi = acos(-1);
-const std::int32_t maxn = 1<<20;
-const std::int32_t logn = 20;
+const long double pi = acosl(-1.0);
+const uint64_t base = 1e6;
 
 class BigInt {
 public:
     BigInt();
     BigInt(const char*);
-    BigInt(const int64_t n);
+    BigInt(const int64_t);
     BigInt(const BigInt&);
     ~BigInt();
 
@@ -27,15 +27,20 @@ public:
     BigInt operator+(const BigInt&) const;
     BigInt operator-(const BigInt&) const;
     BigInt operator*(const BigInt&) const;
+    BigInt operator*(const uint64_t&) const;
     BigInt operator/(const BigInt&) const;
     BigInt operator%(const BigInt&) const;
+    uint64_t operator%(const uint64_t&);
 
     // Arithmetic-assignment operators:
     BigInt& operator+=(const BigInt&);
     BigInt& operator-=(const BigInt&);
+    BigInt& operator*=(const uint64_t&);
     BigInt& operator*=(const BigInt&);
     BigInt& operator/=(const BigInt&);
+    BigInt& operator/=(const uint64_t&);
     BigInt& operator%=(const BigInt&);
+    BigInt& operator%=(const uint64_t&);
 
     BigInt operator+() const;   // unary +
     BigInt operator-() const;   // unary -
@@ -51,20 +56,21 @@ public:
     BigInt& operator=(const BigInt&);
 
     // Handlers
-    void set(const char*);
+    void set(char*);
     void set(const BigInt& n);
     bool getSign() const;
-    std::int32_t getLength() const;
-    std::int32_t* getNumber() const;
+    uint32_t getLength() const;
+    const array<uint64_t>& getNumber() const;
     void print();
 private:
-    void resize(std::int32_t);
+    void resize(uint32_t);
     void setSign(bool);
-    void mul(const BigInt&, const BigInt&, BigInt&) const;
+    void mul(const BigInt &, const BigInt&, BigInt&) const;
+    void mul(const BigInt&, const uint64_t&, BigInt&) const;
     void div(const BigInt&, const BigInt&, BigInt&, BigInt&);
-    std::int32_t* number;
+    void div(const BigInt&, const uint64_t&, BigInt&, uint64_t&);
+    array<uint64_t> number;
     bool pos;
-    std::int32_t length;
 };
 
 #endif //BIGINT_H

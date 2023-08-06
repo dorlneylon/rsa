@@ -8,7 +8,7 @@
 #include "primes/PrimeHandler.h"
 
 InputReader::InputReader() {
-    input = new char[256];
+    input = new char[2048];
 }
 
 InputReader::~InputReader() {
@@ -21,6 +21,7 @@ bool InputReader::read() {
         BigInt a(input);
         std::cin >> input;
         BigInt b(input);
+        uint64_t c = atoll(input);
         std::cin >> input;
         switch (input[0]) {
             case '+':
@@ -46,6 +47,21 @@ bool InputReader::read() {
             case 'r': {
                 BigInt c = bm::random(a,b);
                 c.print();
+                break;
+            }
+            case 'v': {
+                a /= c;
+                a.print();
+                break;
+            }
+            case 'c': {
+                a *= c;
+                a.print();
+                break;
+            }
+            case 'x': {
+                a %= c;
+                a.print();
                 break;
             }
             case '<':

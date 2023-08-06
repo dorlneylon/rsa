@@ -13,13 +13,12 @@ namespace bm {
     BigInt power(const BigInt& a, const BigInt& p) {
         assert(p.getSign() && "Power must be positive");
         BigInt res("1");
-        BigInt tmp; tmp.set(a);
-        BigInt tmpP; tmpP.set(p);
+        BigInt tmp = a, tmpP = p;
         while (tmpP > BigInt("0")) {
-            if (tmpP % BigInt("2") == BigInt("1"))
+            if (tmpP % 2==1)
                 res *= tmp;
             tmp *= tmp;
-            tmpP /= BigInt("2");
+            tmpP /= 2;
         }
         return res;
     }

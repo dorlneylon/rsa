@@ -6,10 +6,9 @@
 #define FTYPE_H
 
 struct ftype {
-    double re, im;
+    long double re, im;
     ftype(): re(0), im(0) {}
-    ftype(double re, double im): re(re), im(im) {}
-    ftype(double re): re(re), im(0) {}
+    ftype(long double re, long double im=0): re(re), im(im) {}
     ftype operator+(const ftype& a);
     ftype operator-(const ftype& a);
     ftype operator*(const ftype& a);

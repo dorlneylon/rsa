@@ -37,10 +37,9 @@ BigInt BigInt::operator-(const BigInt &other) const {
 // да простят меня за этот кошмар. у меня кончились силы в попытках сделать это нормально, и я захардкодил -= и +=.
 BigInt& BigInt::operator+=(const BigInt& other) {
     if (pos != other.pos) {
+        BigInt tmp1, tmp2;
+        tmp1.set(*this), tmp2.set(other);
         if (pos) {
-            BigInt tmp1, tmp2;
-            tmp1.set(*this);
-            tmp2.set(other);
             tmp2.setSign(true);
             tmp1 -= tmp2;
             this->set(tmp1);
@@ -48,10 +47,7 @@ BigInt& BigInt::operator+=(const BigInt& other) {
             return *this;
         }
         else {
-            BigInt tmp1, tmp2;
-            tmp1.set(*this);
             tmp1.setSign(true);
-            tmp2.set(other);
             tmp2 -= tmp1;
             this->set(tmp2);
             this->setSign(tmp1 < tmp2);
@@ -59,25 +55,25 @@ BigInt& BigInt::operator+=(const BigInt& other) {
         }
     } else {
         if (pos) {
-            int32_t maxLength = std::max(length, other.length);
+            uint32_t maxLength = std::max(getLength(), other.getLength());
 
             BigInt result;
             result.resize(maxLength + 1);
 
-            int32_t carry = 0;
-            for (int32_t i = 0; i < maxLength; ++i) {
-                int32_t sum = carry;
-                if (i < length) sum += number[i];
-                if (i < other.length) sum += other.number[i];
-                result.number[i] = sum % 10;
-                carry = sum / 10;
+            uint64_t carry = 0;
+            for (uint32_t i = 0; i < maxLength; ++i) {
+                uint64_t sum = carry;
+                if (i < getLength()) sum += number[i];
+                if (i < other.getLength()) sum += other.number[i];
+                result.number[i] = sum % base;
+                carry = sum / base;
             }
 
             if (carry > 0) {
                 result.number[maxLength] = carry;
-                result.length = maxLength + 1;
+                result.number.resize(maxLength + 1);
             } else
-                result.length = maxLength;
+                result.number.resize(maxLength);
 
             this->set(result);
             return *this;
@@ -115,20 +111,18 @@ BigInt& BigInt::operator-=(const BigInt& other) {
         }
     } else {
         if (pos && *this >= other) {
-            int32_t borrow = 0;
-            for (int32_t i = 0; i < length; ++i) {
-                int32_t sub = number[i] - (i < other.length ? other.number[i] : 0) - borrow;
+            int64_t borrow = 0;
+            for (uint32_t i = 0; i < getLength(); ++i) {
+                int64_t sub = number[i] - (i < other.getLength() ? other.number[i] : 0) - borrow;
                 if (sub < 0) {
-                    sub += 10;
+                    sub += base;
                     borrow = 1;
                 } else {
                     borrow = 0;
                 }
                 number[i] = sub;
             }
-            while (length > 1 && number[length - 1] == 0) {
-                --length;
-            }
+            while (getLength() > 1 && number[getLength() - 1] == 0) number.pop();
         } else if (pos && *this < other) {
             BigInt tmp;
             tmp.set(other);
@@ -166,7 +160,10 @@ BigInt BigInt::operator*(const BigInt &a) const {
 }
 
 BigInt& BigInt::operator*=(const BigInt& other) {
-    this->set(*this * other);
+    BigInt res;
+    res.pos = pos == other.pos;
+    mul(*this, other, res);
+    this->set(res);
     return *this;
 }
 
@@ -181,6 +178,13 @@ BigInt& BigInt::operator/=(const BigInt& other) {
     return *this;
 }
 
+BigInt BigInt::operator*(const uint64_t& a) const {
+    BigInt res;
+    res.set(*this);
+    res *= a;
+    return res;
+}
+
 BigInt& BigInt::operator%=(const BigInt& other) {
     assert(other > BigInt("0") && "Modulo only by positive");
     BigInt quo, rem;
@@ -192,14 +196,38 @@ BigInt& BigInt::operator%=(const BigInt& other) {
     return *this;
 }
 
+BigInt& BigInt::operator%=(const uint64_t& n) {
+    assert(n > 0 && "Modulo by positive and less than 10^6");
+    BigInt quo;
+    uint64_t rem;
+    bool p = this->pos;
+    this->pos = true;
+    div(*this, n, quo, rem);
+    if (p) this->set(std::to_string(rem).c_str());
+    else this->set(std::to_string(n-rem).c_str());
+    return *this;
+}
+
+BigInt& BigInt::operator/=(const uint64_t& n) {
+    assert(n < base && "Divisor must be less than 10^6. Use BigInt instead.");
+    BigInt quo;
+    uint64_t rem;
+    bool p = this->getSign();
+    this->setSign(true);
+    div(*this, n, quo, rem);
+    this->set(quo);
+    this->setSign(p);
+    return *this;
+}
+
 bool BigInt::operator<(const BigInt& other) const {
     if (pos != other.pos)
         return pos < other.pos;
 
-    if (length != other.length)
-        return (length < other.length) ^ !pos;
+    if (getLength() != other.getLength())
+        return (getLength() < other.getLength()) ^ !pos;
 
-    for (int i = length - 1; i >= 0; --i) {
+    for (int32_t i = getLength() - 1; i >= 0; --i) {
         if (number[i] != other.number[i])
             return (number[i] < other.number[i]) ^ !pos;
     }
@@ -208,16 +236,21 @@ bool BigInt::operator<(const BigInt& other) const {
 }
 
 BigInt BigInt::operator/(const BigInt& other) const {
-    BigInt res;
-    res.set(*this);
+    BigInt res = *this;
     res /= other;
     return res;
 }
 BigInt BigInt::operator%(const BigInt& other) const {
-    BigInt res;
-    res.set(*this);
+    BigInt res = *this;
     res %= other;
     return res;
+}
+
+uint64_t BigInt::operator%(const uint64_t& n) {
+    uint64_t rem;
+    BigInt quo;
+    div(*this, n, quo, rem);
+    return rem;
 }
 
 bool BigInt::operator>(const BigInt& other) const {
@@ -233,9 +266,21 @@ bool BigInt::operator>=(const BigInt& other) const {
 }
 
 bool BigInt::operator==(const BigInt& other) const {
-    return pos == other.pos && length == other.length && std::equal(number, number + length, other.number);
+    if (pos != other.pos || getLength() != other.getLength()) return false;
+    for (int32_t i = getLength() - 1; i >= 0; --i) {
+        if (number[i] != other.number[i]) return false;
+    }
+    return true;
 }
 
 bool BigInt::operator!=(const BigInt& other) const {
     return !(*this == other);
+}
+
+BigInt& BigInt::operator*=(const uint64_t &n) {
+    assert(n <= base && "Multiplier must be less than 10^6. Use BigInt instead.");
+    BigInt res;
+    mul(*this, n, res);
+    this->set(res);
+    return *this;
 }

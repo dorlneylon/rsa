@@ -65,6 +65,7 @@ public:
 private:
     void resize(uint32_t);
     void setSign(bool);
+    bool abs_compare(const BigInt&, const BigInt&) const;
     void mul(const BigInt &, const BigInt&, BigInt&) const;
     void mul(const BigInt&, const uint64_t&, BigInt&) const;
     void div(const BigInt&, const BigInt&, BigInt&, BigInt&);

@@ -34,121 +34,46 @@ BigInt BigInt::operator-(const BigInt &other) const {
     return res;
 }
 
-// да простят меня за этот кошмар. у меня кончились силы в попытках сделать это нормально, и я захардкодил -= и +=.
-BigInt& BigInt::operator+=(const BigInt& other) {
-    if (pos != other.pos) {
-        BigInt tmp1, tmp2;
-        tmp1.set(*this), tmp2.set(other);
-        if (pos) {
-            tmp2.setSign(true);
-            tmp1 -= tmp2;
-            this->set(tmp1);
-            this->setSign(pos);
-            return *this;
-        }
-        else {
-            tmp1.setSign(true);
-            tmp2 -= tmp1;
-            this->set(tmp2);
-            this->setSign(tmp1 < tmp2);
-            return *this;
-        }
-    } else {
-        if (pos) {
-            uint32_t maxLength = std::max(getLength(), other.getLength());
-
-            BigInt result;
-            result.resize(maxLength + 1);
-
-            uint64_t carry = 0;
-            for (uint32_t i = 0; i < maxLength; ++i) {
-                uint64_t sum = carry;
-                if (i < getLength()) sum += number[i];
-                if (i < other.getLength()) sum += other.number[i];
-                result.number[i] = sum % base;
-                carry = sum / base;
-            }
-
-            if (carry > 0) {
-                result.number[maxLength] = carry;
-                result.number.resize(maxLength + 1);
-            } else
-                result.number.resize(maxLength);
-
-            this->set(result);
-            return *this;
-        } else {
-            BigInt tmp1, tmp2;
-            tmp1.set(*this);
-            tmp1.setSign(true);
-            tmp2.set(other);
-            tmp2.setSign(true);
-            tmp1 += tmp2;
-            this->set(tmp1);
-            this->setSign(false);
-            return *this;
-        }
+BigInt& BigInt::operator+=(const BigInt& a) {
+    if (this->getSign() != a.getSign())
+            return this->getSign() ?
+                       abs_compare(*this,a) ? *this -= -a : *this = -(-a - *this) :
+                          abs_compare(*this,a) ? *this = -(-*this - a) : *this = a - -*this;
+    bool sgn = *this >= -a;
+    uint64_t carry = 0;
+    for (uint32_t i = 0; i < std::max(getLength(), a.getLength()) || carry; ++i) {
+        if (i == getLength())
+            number.pb(0);
+        number[i] += carry + (i < a.getLength() ? a.number[i] : 0);
+        carry = number[i] >= base;
+        if (carry) number[i] -= base;
     }
+    this->setSign(sgn);
+    return *this;
 }
 
+bool BigInt::abs_compare(const BigInt& a, const BigInt& b) const {
+    if (a.getLength() != b.getLength()) return a.getLength() > b.getLength();
+    for (int32_t i = a.getLength() - 1; i >= 0; --i)
+        if (a.getNumber()[i] != b.getNumber()[i]) return a.getNumber()[i] > b.getNumber()[i];
+}
 
-BigInt& BigInt::operator-=(const BigInt& other) {
-    if (pos != other.pos) {
-        if (pos) {
-            BigInt tmp;
-            tmp.set(other);
-            tmp.setSign(true);
-            *this += tmp;
-            return *this;
-        } else {
-            BigInt tmp;
-            tmp.set(*this);
-            tmp.setSign(true);
-            this->set(other);
-            *this += tmp;
-            this->setSign(false);
-            return *this;
-        }
-    } else {
-        if (pos && *this >= other) {
-            int64_t borrow = 0;
-            for (uint32_t i = 0; i < getLength(); ++i) {
-                int64_t sub = number[i] - (i < other.getLength() ? other.number[i] : 0) - borrow;
-                if (sub < 0) {
-                    sub += base;
-                    borrow = 1;
-                } else {
-                    borrow = 0;
-                }
-                number[i] = sub;
-            }
-            while (getLength() > 1 && number[getLength() - 1] == 0) number.pop();
-        } else if (pos && *this < other) {
-            BigInt tmp;
-            tmp.set(other);
-            tmp -= *this;
-            this->set(tmp);
-            pos = !other.pos;
-        } else if (!pos && *this < other) {
-            BigInt tmp1, tmp2;
-            tmp1.set(other);
-            tmp1.setSign(true);
-            tmp2.set(*this);
-            tmp2.setSign(true);
-            tmp1 -= tmp2;
-            this->set(tmp1);
-            pos = false;
-        } else if (!pos && *this >= other) {
-            BigInt tmp1, tmp2;
-            tmp1.set(other);
-            tmp1.setSign(true);
-            tmp2.set(*this);
-            tmp2.setSign(true);
-            tmp2 -= tmp1;
-            this->set(tmp2);
-            pos = true;
-        }
+BigInt& BigInt::operator-=(const BigInt& a) {
+    if (this->getSign() != a.getSign())
+        return this->getSign() ?
+               abs_compare(*this,a) ? *this += -a : *this = -(-a + *this) :
+                    abs_compare(*this,a) ? *this = -(-*this + a) : *this = -a - -*this;
+    bool sgn = *this >= a;
+    if (!abs_compare(*this,a)) return *this = -(a - *this);
+    uint64_t carry = 0;
+    for (uint32_t i = 0; i < a.getLength() || carry; ++i) {
+        number[i] -= carry + (i < a.getLength() ? a.number[i] : 0);
+        carry = number[i] >= base;
+        if (carry) number[i] += base;
     }
+    while (number.getSize() > 1 && number[getLength()-1] == 0)
+        number.pop();
+    this->setSign(sgn);
     return *this;
 }
 

@@ -10,7 +10,6 @@ BigInt PrimeHandler::takeRandom(const uint64_t n) {
     BigInt  tmp = bm::power(BigInt("2"),bp);
     BigInt  min = tmp+BigInt("1"),
             max = bm::power(BigInt("2"),BigInt(std::to_string(n).c_str()))-BigInt("1");
-//    BigInt res; res.set(bm::random(min, max));
     return bm::random(min, max);
 }
 
@@ -18,9 +17,8 @@ BigInt PrimeHandler::getPotentialPrime(const uint64_t n) {
     while (true) {
         BigInt tmp = takeRandom(n);
         bool f = false;
-        if (tmp.getNumber()[0]%2 == 0) continue;
-        for (const int32_t& d : primes)
-            if (tmp % BigInt(std::to_string(d).c_str()) == BigInt("0")) {
+        for (const auto& d : primes)
+            if (tmp % d == 0) {
                 f = true;
                 break;
             }
@@ -28,17 +26,48 @@ BigInt PrimeHandler::getPotentialPrime(const uint64_t n) {
     }
 }
 
-bool PrimeHandler::getMillerRabinPrime(const BigInt &a) {
-    uint64_t power_of_two = 0;
-    BigInt tmp = a - 1;
-    while ((tmp /= BigInt("2")).getSign()) power_of_two++;
-    BigInt d = (a - 1) / bm::power(BigInt("2"), BigInt(std::to_string(power_of_two).c_str()));
-    return bm::powmod(a, d, a) == BigInt("1");
+bool PrimeHandler::getMillerRabinPrime(const BigInt &n, BigInt& a) {
+    // n is being tested, a is a parameter
+    assert(n > 1 && "Number must be greater than 1");
+    if (n.getNumber()[0]%2==0) return n == BigInt("2");
+
+    if (a < BigInt("2")) a = BigInt("2");
+    for (BigInt g; (g = bm::gcd(a, n)) != BigInt("1"); a += BigInt("1"))
+        if (n > g) return false;
+
+    BigInt n_1 = n - BigInt("1");
+    BigInt p,q;
+    bm::transform(n_1, p, q);
+
+    BigInt rem = bm::powmod(a, q, n);
+    if (rem == BigInt("1") || rem == n_1) return true;
+
+    for (BigInt i=BigInt("1"); i<p; i+=BigInt("1")) {
+        rem = (rem*rem)%n;
+        if (rem == n_1) return true;
+        if (rem == BigInt("1")) return false;
+    }
+    return false;
 }
 
-BigInt& PrimeHandler::getPrime(const uint64_t n) {
+bool PrimeHandler::_mlr(const BigInt &n, BigInt &a) {
+    return getMillerRabinPrime(n,a);
+}
+
+bool PrimeHandler::goHardTest(BigInt &n) {
+    BigInt a = BigInt("2"), sqrt = bm::sqrt(n);
+    for (;a<=sqrt;a+=BigInt("1"))
+        if (n%a == BigInt("0")) return false;
+    return true;
+}
+
+BigInt PrimeHandler::getPrime(const uint64_t n) {
     BigInt candidate = getPotentialPrime(n);
-    for (uint32_t i=0;i<30;++i) if (!getMillerRabinPrime(candidate)) return candidate = BigInt("-1");
+    for (uint8_t i=0;i<30;++i) {
+        BigInt parameter = bm::random(BigInt("2"), candidate-BigInt("2"));
+        if (!getMillerRabinPrime(candidate, parameter)) return getPrime(n);
+    }
+    if (!goHardTest(candidate)) return getPrime(n);
     return candidate;
 }
 

@@ -77,8 +77,8 @@ bool InputReader::read() {
                 bm::abs(a).print();
                 break;
             case 'o': {
-                BigInt tmp = PrimeHandler::getPrime(30);
-                tmp.print();
+                BigInt prime = PrimeHandler::getPrime(c);
+                prime.print();
                 break;
             }
             case '^':

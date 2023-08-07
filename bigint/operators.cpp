@@ -56,6 +56,7 @@ bool BigInt::abs_compare(const BigInt& a, const BigInt& b) const {
     if (a.getLength() != b.getLength()) return a.getLength() > b.getLength();
     for (int32_t i = a.getLength() - 1; i >= 0; --i)
         if (a.getNumber()[i] != b.getNumber()[i]) return a.getNumber()[i] > b.getNumber()[i];
+    return true;
 }
 
 BigInt& BigInt::operator-=(const BigInt& a) {
@@ -165,6 +166,13 @@ BigInt BigInt::operator/(const BigInt& other) const {
     res /= other;
     return res;
 }
+
+BigInt BigInt::operator/(const uint64_t& n) const {
+    BigInt res = *this;
+    res /= n;
+    return res;
+}
+
 BigInt BigInt::operator%(const BigInt& other) const {
     BigInt res = *this;
     res %= other;

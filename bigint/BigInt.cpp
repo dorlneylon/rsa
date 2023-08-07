@@ -179,7 +179,8 @@ bool BigInt::getSign() const {
 
 void BigInt::print() {
     if (!pos) std::cout << "-";
-    for (int32_t i=getLength()-1;i>=0;--i) printf("%llu", number[i]);
+    printf("%llu", number[getLength()-1]);
+    for (int32_t i=getLength()-2;i>=0;--i) printf("%06llu", number[i]);
     std::cout << "\n";
 }
 

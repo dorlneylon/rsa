@@ -9,11 +9,13 @@
 
 class PrimeHandler {
 public:
-    static BigInt& getPrime(const uint64_t n);
+    static BigInt getPrime(const uint64_t n);
+    static bool _mlr(const BigInt&, BigInt&);
 private:
     static BigInt getPotentialPrime(const uint64_t);
-    static bool getMillerRabinPrime(const BigInt&);
+    static bool getMillerRabinPrime(const BigInt&, BigInt&);
     static BigInt takeRandom(const uint64_t n);
+    static bool goHardTest(BigInt &n);
     static int32_t getPrimitiveRoot(int32_t);
     static constexpr const int32_t primes[] {
             2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31,

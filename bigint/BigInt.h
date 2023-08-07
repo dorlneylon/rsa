@@ -29,6 +29,7 @@ public:
     BigInt operator*(const BigInt&) const;
     BigInt operator*(const uint64_t&) const;
     BigInt operator/(const BigInt&) const;
+    BigInt operator/(const uint64_t&) const;
     BigInt operator%(const BigInt&) const;
     uint64_t operator%(const uint64_t&);
 

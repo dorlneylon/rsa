@@ -6,8 +6,7 @@
 
 namespace bm {
     BigInt& abs(BigInt& a) {
-        if (!a.getSign()) a.set(-a);
-        return a;
+        return a.getSign() ? a : a = -a;
     }
 
     BigInt power(const BigInt& a, const BigInt& p) {
@@ -15,7 +14,7 @@ namespace bm {
         BigInt res("1");
         BigInt tmp = a, tmpP = p;
         while (tmpP > BigInt("0")) {
-            if (tmpP % 2==1)
+            if (tmpP%2==1)
                 res *= tmp;
             tmp *= tmp;
             tmpP /= 2;
@@ -35,18 +34,36 @@ namespace bm {
             if (b & 1) res = (uint64_t)(res*1ll*a%p), --b;
             else a = (int32_t)(a*1ll*a%p), b >>= 1;
         return res;
-    };
+    }
+
+    BigInt sqrt(const BigInt& a) {
+        BigInt l("0"), r = a, m;
+        while (r-l > BigInt("1")) {
+            m = (l+r)/2;
+            if (m*m <= a) l = m;
+            else r = m;
+        }
+        return l;
+    }
 
     BigInt powmod(const BigInt& a, const BigInt& p, const BigInt& m) {
         assert(p.getSign() && "Power must be positive");
-        BigInt res("1");
-        BigInt tmp = a, tmpP = p;
+        BigInt res("1"), tmp = a, tmpP = p;
         while (tmpP > BigInt("0")) {
-            if (tmpP % BigInt("2") == BigInt("1"))
-                res = (res * tmp) % m;
+            if (tmpP % 2 == 1) res = (res * tmp) % m;
             tmp = (tmp * tmp) % m;
-            tmpP /= BigInt("2");
+            tmpP /= 2;
         }
         return res;
+    }
+
+    BigInt gcd(const BigInt& a, const BigInt& b) {
+        return b == BigInt("0") ? a : gcd(b, a % b);
+    }
+
+    void transform(const BigInt& n, BigInt& p, BigInt& q) {
+        p = BigInt("0"), q = n;
+        while (q % 2 == 0)
+            p += BigInt("1"), q /= 2;
     }
 } // namespace bm

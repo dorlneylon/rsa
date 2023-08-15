@@ -31,10 +31,7 @@ bool InputReader::read() {
     DBCore db;
     passwords.setKeys(_N, _E, _D);
     db.connect();
-    // read from db
-    std::string s = db.select("SELECT * FROM keys;");
-    printf("%s\n", s.c_str());
-    return 1;
+    return 0;
 }
 
 //bool InputReader::read() {

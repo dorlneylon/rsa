@@ -25,10 +25,10 @@ void DBCore::establish_connection() {
                                     " dbname=" + dbname + " user=" + user + " password=" + password;
     try {
         connection = new pqxx::connection(connection_string);
-        if (connection->is_open())
-            printf("Opened database successfully: %s\n", connection->dbname());
-        else
-            printf("Can't open database\n");
+//        if (connection->is_open())
+//            printf("Opened database successfully: %s\n", connection->dbname());
+//        else
+//            printf("Can't open database\n");
     } catch (const std::exception& e) {
         printf("Error opening database: %s\n", e.what());
     }
@@ -92,7 +92,7 @@ void DBCore::print() { // debug
     printf("Table:\n");
     try {
         work = new pqxx::work(*connection);
-        result = new pqxx::result(work->exec("SELECT * FROM passwords;"));
+        result = new pqxx::result(work->exec("SELECT * FROM keys;"));
         for (auto row: *result) {
             for (auto field: row)
                 printf("%s\t", field.c_str());

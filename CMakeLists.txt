@@ -9,8 +9,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -pedantic")
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 
-add_executable(password_manager main.cpp bigint/operators.cpp structures/ftype.cpp bigint/BigInt.cpp bigint/bigmath.cpp InputReader.cpp primes/PrimeHandler.cpp managers/Password.cpp managers/Date.cpp)
+add_executable(password_manager main.cpp bigint/operators.cpp structures/ftype.cpp bigint/BigInt.cpp bigint/bigmath.cpp InputReader.cpp primes/PrimeHandler.cpp managers/Password.cpp managers/Date.cpp structures/PasswordCollection.cpp db/DBCore.cpp)
 
-# build libpqxx
 add_subdirectory(libpqxx)
-target_link_libraries(password_manager PRIVATE pqxx pq)
+target_link_libraries(password_manager pqxx)

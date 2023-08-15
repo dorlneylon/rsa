@@ -117,8 +117,13 @@ BigInt::BigInt(const BigInt& n) {
     set(n);
 }
 
-BigInt stoi(char* number) {
-    // TODO: зашифровать строку и вернуть BigInt
+array<BigInt> stoi(array<char> password) {
+    array<BigInt> res(password.getSize());
+    for (uint32_t i = 0; i < password.getSize(); ++i) {
+        BigInt tmp;
+        tmp.set({password[i]+'0'});
+        res[i] = tmp;
+    }
 }
 
 

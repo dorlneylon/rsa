@@ -6,6 +6,7 @@
 #define ARRAY_H
 #include <cstdint>
 #include <cassert>
+#include <iterator>
 
 template <typename T>
 struct array {
@@ -43,10 +44,15 @@ public:
             data[i] = arr[i];
     }
 
+    void clear() {
+        dealloc();
+        size = 0;
+    }
 
     T& operator[](const uint32_t& i) const {
         return get(i);
     }
+
     array<T>& operator=(const array<T>& a) {
         dealloc();
         size = a.size;
@@ -97,10 +103,10 @@ public:
     }
 
     uint32_t getSize() const { return size; }
-    void dealloc() { if (this->size) delete[] data; }
 private:
     T* data;
     uint32_t size;
+    void dealloc() { if (this->size) delete[] data; }
 };
 
 

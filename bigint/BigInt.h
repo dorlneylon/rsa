@@ -7,10 +7,10 @@
 #include <cstdint>
 #include <cstring>
 #include <cmath>
-#include <complex>
 #include <iostream>
-#include "ftype.h"
-#include "array.h"
+#include <set>
+#include "../structures/ftype.h"
+#include "../structures/array.h"
 
 const long double pi = acosl(-1.0);
 const uint64_t base = 1e6;
@@ -57,12 +57,13 @@ public:
     BigInt& operator=(const BigInt&);
 
     // Handlers
-    void set(char*);
+    void set(const char*);
     void set(const BigInt& n);
     bool getSign() const;
     uint32_t getLength() const;
     const array<uint64_t>& getNumber() const;
     void print();
+    void print(std::ostream&) const;
 private:
     void resize(uint32_t);
     void setSign(bool);

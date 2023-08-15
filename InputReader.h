@@ -5,7 +5,9 @@
 #ifndef INPUTREADER_H
 #define INPUTREADER_H
 #include <iostream>
-
+#include "structures/array.h"
+#include "bigint/BigInt.h"
+#include "structures/PasswordCollection.h"
 
 class InputReader {
 public:
@@ -14,7 +16,9 @@ public:
     void run();
     ~InputReader();
 private:
-    char* input;
+    BigInt _N, _E, _D;
+    array<char> input;
+    PasswordCollection passwords;
 };
 
 

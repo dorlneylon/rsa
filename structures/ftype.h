@@ -14,7 +14,7 @@ struct ftype {
     ftype operator*(const ftype& a);
     ftype& operator*=(const ftype& a);
     ftype& operator+=(const ftype& a);
-    ftype operator/(const ftype& a);
+    inline ftype operator/(const ftype& a);
     ftype& operator/=(const ftype& a);
 };
 

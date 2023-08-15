@@ -61,6 +61,25 @@ namespace bm {
         return b == BigInt("0") ? a : gcd(b, a % b);
     }
 
+    BigInt gcdex(const BigInt& a, const BigInt& b, BigInt& x, BigInt& y) {
+        if (a == BigInt("0")) {
+            x = BigInt("0"), y = BigInt("1");
+            return b;
+        }
+        BigInt x1, y1;
+        BigInt d = gcdex(b % a, a, x1, y1);
+        x = y1 - (b / a) * x1;
+        y = x1;
+        return d;
+    }
+
+    BigInt inverse(const BigInt& a, const BigInt& m) {
+        BigInt x, y;
+        BigInt g = gcdex(a, m, x, y);
+        if (g != BigInt("1")) return BigInt("0");
+        return (x % m + m) % m;
+    }
+
     void transform(const BigInt& n, BigInt& p, BigInt& q) {
         p = BigInt("0"), q = n;
         while (q % 2 == 0)

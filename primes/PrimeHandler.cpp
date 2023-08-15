@@ -67,7 +67,7 @@ BigInt PrimeHandler::getPrime(const uint64_t n) {
         BigInt parameter = bm::random(BigInt("2"), candidate-BigInt("2"));
         if (!getMillerRabinPrime(candidate, parameter)) return getPrime(n);
     }
-    if (!goHardTest(candidate)) return getPrime(n);
+//    if (!goHardTest(candidate)) return getPrime(n);
     return candidate;
 }
 

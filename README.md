@@ -1,4 +1,4 @@
-# RSA-ncryption algorithm
+# RSA-encryption algorithm
 ### Usage
 1. Install the required SQL tables via `tables.sql`.
 2. Install libpqxx.
